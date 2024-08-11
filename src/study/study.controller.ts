@@ -1,31 +1,31 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UsePipes, ValidationPipe } from "@nestjs/common";
-import { GithubService } from "./github.service";
+import { StudyService } from "./study.service";
 import { Board, BoardStatus } from "./board.model";
 import { CreateBoardDto } from "./dto/create-board.dto";
 
-@Controller('github')
-export class GithubController {
-	constructor(private githubService: GithubService) {}
+@Controller('study')
+export class StudyController {
+	constructor(private studyService: StudyService) {}
 
 	@Get('/')
 	getAllBoards(): Board[] {
-		return this.githubService.getAllBoards();
+		return this.studyService.getAllBoards();
 	}
 
 	@Post()
 	@UsePipes(ValidationPipe)
 	createBoard(@Body() createBoardDto: CreateBoardDto): Board {
-		return this.githubService.createBoard(createBoardDto);
+		return this.studyService.createBoard(createBoardDto);
 	}
 
 	@Get('/:id')
 	getBoardById(@Param('id') id: string): Board {
-		return this.githubService.getBoardById(id);
+		return this.studyService.getBoardById(id);
 	}
 
 	@Delete('/:id')
 	deleteBoard(@Param('id') id: string): void {
-		this.githubService.deleteBoard(id);
+		this.studyService.deleteBoard(id);
 	}
 
 	@Patch('/:id/status')
@@ -33,6 +33,6 @@ export class GithubController {
 		@Param('id') id: string,
 		@Body('status') status: BoardStatus,
 	) {
-		return this.githubService.updateBoardStatus(id, status);
+		return this.studyService.updateBoardStatus(id, status);
 	}
 }
