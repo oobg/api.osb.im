@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
 import { GithubService } from "./github.service";
-import { Board } from "./board.model";
+import { Board, BoardStatus } from "./board.model";
 import { CreateBoardDto } from "./dto/create-board.dto";
 
 @Controller('github')
@@ -25,5 +25,13 @@ export class GithubController {
 	@Delete('/:id')
 	deleteBoard(@Param('id') id: string): void {
 		this.githubService.deleteBoard(id);
+	}
+
+	@Patch('/:id/status')
+	updateBoardStatus(
+		@Param('id') id: string,
+		@Body('status') status: BoardStatus,
+	) {
+		return this.githubService.updateBoardStatus(id, status);
 	}
 }
