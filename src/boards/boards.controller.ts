@@ -1,32 +1,32 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UsePipes, ValidationPipe } from "@nestjs/common";
-import { StudyService } from "./study.service";
+import { BoardsService } from "./boards.service";
 import { Board, BoardStatus } from "./board.model";
 import { CreateBoardDto } from "./dto/create-board.dto";
-import {BoardStatusValidationPipe} from "./pipes/board-status-validation.pipe";
+import { BoardStatusValidationPipe } from "./pipes/board-status-validation.pipe";
 
-@Controller('study')
-export class StudyController {
-	constructor(private studyService: StudyService) {}
+@Controller('boards')
+export class BoardsController {
+	constructor(private boardsService: BoardsService) {}
 
 	@Get('/')
 	getAllBoards(): Board[] {
-		return this.studyService.getAllBoards();
+		return this.boardsService.getAllBoards();
 	}
 
 	@Post()
 	@UsePipes(ValidationPipe)
 	createBoard(@Body() createBoardDto: CreateBoardDto): Board {
-		return this.studyService.createBoard(createBoardDto);
+		return this.boardsService.createBoard(createBoardDto);
 	}
 
 	@Get('/:id')
 	getBoardById(@Param('id') id: string): Board {
-		return this.studyService.getBoardById(id);
+		return this.boardsService.getBoardById(id);
 	}
 
 	@Delete('/:id')
 	deleteBoard(@Param('id') id: string): void {
-		this.studyService.deleteBoard(id);
+		this.boardsService.deleteBoard(id);
 	}
 
 	@Patch('/:id/status')
@@ -34,6 +34,6 @@ export class StudyController {
 		@Param('id') id: string,
 		@Body('status', BoardStatusValidationPipe) status: BoardStatus,
 	) {
-		return this.studyService.updateBoardStatus(id, status);
+		return this.boardsService.updateBoardStatus(id, status);
 	}
 }

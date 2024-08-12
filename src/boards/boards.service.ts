@@ -4,7 +4,7 @@ import { v1 as uuid } from "uuid";
 import { CreateBoardDto } from "./dto/create-board.dto";
 
 @Injectable()
-export class StudyService {
+export class BoardsService {
 	private boards: Board[] = [];
 
 	getAllBoards(): Board[] {
