@@ -1,13 +1,13 @@
-import { DataSource, Repository } from "typeorm";
-import { BoardEntity } from "./board.entity";
+import { Repository } from "typeorm";
+import { Board } from "./board.entity";
 import { CreateBoardDto } from "./dto/create-board.dto";
 import { BoardStatus } from "./board-status.enum";
 import { NotFoundException } from "@nestjs/common";
 import { CustomRepository } from "../configs/typeorm-ex.decorator";
 
-@CustomRepository(BoardEntity)
-export class BoardRepository extends Repository<BoardEntity> {
-	async createBoard(createBoardDto: CreateBoardDto): Promise<BoardEntity> {
+@CustomRepository(Board)
+export class BoardRepository extends Repository<Board> {
+	async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
 		const { title, description } = createBoardDto;
 
 		const board = this.create({
@@ -20,7 +20,7 @@ export class BoardRepository extends Repository<BoardEntity> {
 		return board;
 	}
 
-	async getBoardById(id: number): Promise<BoardEntity> {
+	async getBoardById(id: number): Promise<Board> {
 		const found = await this.findOne({ where: { id } });
 
 		if (!found) {
