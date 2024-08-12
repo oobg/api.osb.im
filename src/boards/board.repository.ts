@@ -3,7 +3,7 @@ import { Board } from "./board.entity";
 import { CreateBoardDto } from "./dto/create-board.dto";
 import { BoardStatus } from "./board-status.enum";
 import { NotFoundException } from "@nestjs/common";
-import { CustomRepository } from "../configs/typeorm-ex.decorator";
+import { CustomRepository } from "../configs/typeorm/typeorm-ex.decorator";
 
 @CustomRepository(Board)
 export class BoardRepository extends Repository<Board> {
