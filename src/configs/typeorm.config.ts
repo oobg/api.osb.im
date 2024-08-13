@@ -7,7 +7,7 @@ function TypeOrmConfig(): TypeOrmModuleOptions {
 		MIGRATIONS: [__dirname + "/../**/*.migration.{js,ts}"],
 		MIGRATION_RUN: false,
 		LOGGING: false,
-		SYNCRONIZE: process.env.DB_SYNCHRONIZE.toLowerCase() === "true" ? true : false,
+		SYNCRONIZE: process.env.DB_SYNCHRONIZE?.toLowerCase() === "true" ? true : false,
 	};
 
 	const database = {
