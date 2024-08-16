@@ -29,4 +29,9 @@ export class BoardRepository extends Repository<Board> {
 
 		return found;
 	}
+
+	async deleteBoard(id: number): Promise<Board> {
+		const found = await this.getBoardById(id);
+		return await this.remove(found);
+	}
 }

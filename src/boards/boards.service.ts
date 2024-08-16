@@ -20,11 +20,10 @@ export class BoardsService {
 		return this.boardRepository.getBoardById(id);
 	}
 
-	// deleteBoard(id: string): void {
-	// 	const found = this.getBoardById(id);
-	// 	this.boards = this.boards.filter((board) => board.id !== found.id);
-	// }
-	//
+	deleteBoard(id: number): Promise<Board> {
+		return this.boardRepository.deleteBoard(id);
+	}
+
 	// updateBoardStatus(id: string, status: BoardStatus): Board {
 	// 	const board = this.getBoardById(id);
 	// 	board.status = status;
