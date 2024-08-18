@@ -4,6 +4,7 @@ import { TypeOrmConfig } from "./configs/typeorm.config";
 import { BoardsModule } from './boards/boards.module';
 import { ConfigModule } from "@nestjs/config";
 import { GithubModule } from './github/github.module';
+import { ScheduleModule } from "@nestjs/schedule";
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { GithubModule } from './github/github.module';
       cache: true,
     }),
     TypeOrmModule.forRootAsync({ useFactory: TypeOrmConfig }),
+    ScheduleModule.forRoot(),
     BoardsModule,
     GithubModule,
   ],
