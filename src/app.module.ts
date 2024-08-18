@@ -3,6 +3,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { TypeOrmConfig } from "./configs/typeorm.config";
 import { BoardsModule } from './boards/boards.module';
 import { ConfigModule } from "@nestjs/config";
+import { GithubModule } from './github/github.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ConfigModule } from "@nestjs/config";
     }),
     TypeOrmModule.forRootAsync({ useFactory: TypeOrmConfig }),
     BoardsModule,
+    GithubModule,
   ],
 })
 export class AppModule {}
