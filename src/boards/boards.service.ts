@@ -9,7 +9,7 @@ export class BoardsService {
 	constructor(private readonly boardRepository: BoardRepository) {}
 
 	async getAllBoards(): Promise<Board[]> {
-		return this.boardRepository.find();
+		return await this.boardRepository.find();
 	}
 
 	createBoard(createBoardDto: CreateBoardDto): Promise<Board> {

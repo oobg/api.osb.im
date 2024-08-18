@@ -16,7 +16,7 @@ import { CreateBoardDto } from "./dto/create-board.dto";
 import { BoardStatusValidationPipe } from "./pipes/board-status-validation.pipe";
 import { Board } from "./board.entity";
 
-@Controller('boards')
+@Controller("boards")
 export class BoardsController {
 	constructor(private readonly boardsService: BoardsService) {}
 
@@ -32,19 +32,19 @@ export class BoardsController {
 	}
 
 	@Get("/:id")
-	getBoardById(@Param("id") id: number): Promise<Board> {
+	getBoardById(@Param("id", ParseIntPipe) id: number): Promise<Board> {
 		return this.boardsService.getBoardById(id);
 	}
 
-	@Delete('/:id')
-	deleteBoard(@Param('id', ParseIntPipe) id: number): Promise<Board> {
+	@Delete("/:id")
+	deleteBoard(@Param("id", ParseIntPipe) id: number): Promise<Board> {
 		return this.boardsService.deleteBoard(id);
 	}
 
-	@Patch('/:id/status')
+	@Patch("/:id/status")
 	updateBoardStatus(
-		@Param('id', ParseIntPipe) id: number,
-		@Body('status', BoardStatusValidationPipe) status: BoardStatus,
+		@Param("id", ParseIntPipe) id: number,
+		@Body("status", BoardStatusValidationPipe) status: BoardStatus,
 	): Promise<Board> {
 		return this.boardsService.updateBoardStatus(id, status);
 	}
