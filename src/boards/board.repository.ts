@@ -34,4 +34,11 @@ export class BoardRepository extends Repository<Board> {
 		const found = await this.getBoardById(id);
 		return await this.remove(found);
 	}
+
+	async updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
+		const board = await this.getBoardById(id);
+		board.status = status;
+		await this.save(board);
+		return board;
+	}
 }

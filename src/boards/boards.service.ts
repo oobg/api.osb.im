@@ -16,7 +16,7 @@ export class BoardsService {
 		return this.boardRepository.createBoard(createBoardDto);
 	}
 
-	async getBoardById(id: number): Promise<Board> {
+	getBoardById(id: number): Promise<Board> {
 		return this.boardRepository.getBoardById(id);
 	}
 
@@ -24,9 +24,7 @@ export class BoardsService {
 		return this.boardRepository.deleteBoard(id);
 	}
 
-	// updateBoardStatus(id: string, status: BoardStatus): Board {
-	// 	const board = this.getBoardById(id);
-	// 	board.status = status;
-	// 	return board;
-	// }
+	updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
+		return this.boardRepository.updateBoardStatus(id, status);
+	}
 }
