@@ -8,8 +8,8 @@ export class TaskService {
 	constructor(private readonly githubService: GithubService) {}
 
 	@Cron("0 0 0 * * *") // Run every day at midnight
-	handleCron() {
+	async handleCron() {
 		this.logger.debug("Running a task that updates the Github Service...");
-		this.githubService.updateBoard();
+		// await this.githubService.cloneRepository();
 	}
 }
