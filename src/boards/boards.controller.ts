@@ -20,10 +20,10 @@ import { Board } from "./board.entity";
 export class BoardsController {
 	constructor(private readonly boardsService: BoardsService) {}
 
-	// @Get('/')
-	// getAllBoards(): Board[] {
-	// 	return this.boardsService.getAllBoards();
-	// }
+	@Get("/")
+	getAllBoards(): Promise<Board[]> {
+		return this.boardsService.getAllBoards();
+	}
 
 	@Post("/")
 	@UsePipes(ValidationPipe)
