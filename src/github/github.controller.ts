@@ -8,6 +8,15 @@ interface HttpResponse<T> {
 	error?: string;
 }
 
+interface DirectoryTree {
+	[key: string]: string[] | DirectoryTree;
+}
+
+interface ParseResult {
+	directory: DirectoryTree | string[];
+	media: DirectoryTree | string[];
+}
+
 @Controller("github")
 export class GithubController {
 	constructor(private readonly githubService: GithubService) {}
@@ -16,5 +25,10 @@ export class GithubController {
 	async cloneRepository(): Promise<HttpResponse<string>> {
 		// httpHandler 함수가 반환한 결과를 그대로 클라이언트에 응답
 		return await httpHandler(async () => await this.githubService.cloneRepository());
+	}
+
+	@Get("/parse")
+	async parseRepository(): Promise<HttpResponse<ParseResult>> {
+		return await httpHandler(async () => await this.githubService.parseRepository());
 	}
 }
