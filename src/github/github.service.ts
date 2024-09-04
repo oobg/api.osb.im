@@ -2,15 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { GithubRepository } from "./github.repository";
 import { gitClone, gitInstall, gitVersionCheck } from "./util/git";
 import { parser } from "./util/pathParser";
-
-interface DirectoryTree {
-	[key: string]: string[] | DirectoryTree;
-}
-
-interface ParseResult {
-	directory: DirectoryTree | string[];
-	media: DirectoryTree | string[];
-}
+import { ParseResult } from "../@types/board";
 
 @Injectable()
 export class GithubService {

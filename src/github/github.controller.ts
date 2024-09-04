@@ -1,20 +1,12 @@
 import { Controller, Get } from "@nestjs/common";
 import { GithubService } from "./github.service";
 import httpHandler from "./util/httpHandler";
+import { ParseResult } from "../@types/board";
 
 interface HttpResponse<T> {
 	status: number;
 	message?: T;
 	error?: string;
-}
-
-interface DirectoryTree {
-	[key: string]: string[] | DirectoryTree;
-}
-
-interface ParseResult {
-	directory: DirectoryTree | string[];
-	media: DirectoryTree | string[];
 }
 
 @Controller("github")

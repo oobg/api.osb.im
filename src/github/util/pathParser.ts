@@ -1,15 +1,7 @@
 import { join } from "path";
 import { readdirSync, statSync, existsSync } from "fs";
 import * as process from "node:process";
-
-interface DirectoryTree {
-	[key: string]: string[] | DirectoryTree;
-}
-
-interface ParseResult {
-	directory: DirectoryTree | string[];
-	media: DirectoryTree | string[];
-}
+import { DirectoryTree, ParseResult } from "../../@types/board";
 
 const excludedFiles = ["README.md"];
 const excludedPatterns = [/^\./, /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\.md$/]; // 점(.)으로 시작하는 디렉토리와 IP 패턴
