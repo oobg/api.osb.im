@@ -1,100 +1,73 @@
 import { join } from "path";
-import { exec } from "child_process";
+import simpleGit, { SimpleGit } from "simple-git";
 import "dotenv/config";
-import os from "os";
-import { existsSync, rmSync } from "fs";
+import { existsSync } from "fs";
 
-const gitInstall = (): Promise<void> => {
-	return new Promise((resolve, reject) => {
-		const platform = os.platform();
-		let installCommand: string;
+// Git 인터페이스 초기화
+const git: SimpleGit = simpleGit();
 
-		if (platform === "linux") {
-			const distro = getLinuxDistro();
-			if (distro === "alpine") {
-				installCommand = "apk add git";
-			} else {
-				installCommand = "sudo apt-get update && sudo apt-get install git -y";
-			}
-		} else if (platform === "darwin") {
-			installCommand = "brew install git";
-		} else if (platform === "win32") {
-			reject("Please install Git manually from https://git-scm.com/download/win");
-			return;
-		} else {
-			reject(`Unsupported platform: ${platform}`);
-			return;
-		}
+// Git 리포지토리 클론 함수
+const gitClone = async (): Promise<string> => {
+	const projectRoot = process.cwd();
+	const targetDir = join(projectRoot, "src", process.env.GIT_DIR || "."); // 기본 경로를 상위 프로젝트로 설정
 
-		exec(installCommand, (error, stdout, stderr) => {
-			if (error) {
-				reject(`Error installing Git: ${error.message}`);
-				return;
-			}
-			if (stderr) {
-				console.error(`stderr: ${stderr}`);
-			}
-			console.log(`stdout: ${stdout}`);
-			console.log("Git installation completed successfully.");
-			resolve();
-		});
-	});
-}
-
-const getLinuxDistro = () => {
-	const distro = os.release().toLowerCase();
-	if (distro.includes("alpine")) {
-		return "alpine";
-	} else if (distro.includes("ubuntu") || distro.includes("debian")) {
-		return "ubuntu";
-	} else {
-		return "unknown";
+	// 디렉토리가 존재하면 클론을 건너뛴다
+	if (existsSync(targetDir)) {
+		console.log("Directory already exists, skipping clone.");
+		return `Directory already exists: ${targetDir}`;
 	}
-}
 
-const gitClone = (): Promise<string> => {
-	return new Promise((resolve, reject) => {
-		const projectRoot = process.cwd();
-		const targetDir = join(projectRoot, "src", process.env.GIT_DIR);
+	const repoUrl = process.env.GIT_URL;
+	if (!repoUrl || !process.env.GIT_DIR) {
+		throw new Error("Missing GIT_URL or GIT_DIR in environment variables.");
+	}
 
-		if (existsSync(targetDir)) {
-			resolve(`Directory already exists, Skipping clone.`);
-			return;
-		}
+	try {
+		await git.clone(repoUrl, targetDir);
+		console.log(`Repository cloned successfully to ${targetDir}`);
+		return `Repository cloned successfully to ${targetDir}`;
+	} catch (error) {
+		console.error(`Error cloning repository: ${error.message}`);
+		throw error;
+	}
+};
 
-		const gitCommand = `git clone ${process.env.GIT_URL} ${targetDir}`;
+// Git 히스토리 가져오기 함수
+const gitHistory = async (limit: number = 10): Promise<any> => {
+	const projectRoot = process.cwd();
+	const targetDir = join(projectRoot, "src", process.env.GIT_DIR || "clone"); // 상위 프로젝트의 루트로 설정
 
-		exec(gitCommand, (error, stdout, stderr) => {
-			if (error) {
-				console.error(`Error cloning repository: ${error.message}`);
-				reject(new Error(`Error cloning repository: ${error.message}`));
-				return;
-			}
+	// .git 폴더 확인
+	if (!existsSync(join(targetDir, ".git"))) {
+		console.error(".git directory does not exist in target directory:", targetDir);
+		return;
+	}
 
-			if (stderr) {
-				console.log(`Git Message: ${stderr}`);
-			}
+	// 상위 Git 리포지토리 경로로 이동
+	const gitRepo = simpleGit(targetDir);
 
-			console.log(`Repository cloned successfully: ${stdout}`);
-			resolve(`Repository cloned successfully: ${stdout}`);
-		});
-	});
-}
+	try {
+		// Git 로그 옵션 설정
+		const logOptions = {
+			maxCount: limit,
+			format: {
+				hash: '%H',
+				date: '%ai',
+				message: '%s',
+				author_name: '%an',
+				author_email: '%ae',
+			},
+		};
 
-const gitVersionCheck = (): Promise<void> => {
-	return new Promise((resolve, reject) => {
-		exec('git --version', (error, stdout, stderr) => {
-			if (error) {
-				reject(`Git is not installed: ${stderr}`);
-				return;
-			}
-			resolve();
-		});
-	});
-}
+		const logResult = await gitRepo.log(logOptions);
+		console.log("Git log fetched successfully:", logResult);
+		return logResult;
+	} catch (error) {
+		console.error("### Error fetching Git log:", error);
+	}
+};
 
 export {
-	gitVersionCheck,
-	gitInstall,
 	gitClone,
-}
+	gitHistory,
+};

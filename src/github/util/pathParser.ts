@@ -1,6 +1,6 @@
 import { join } from "path";
 import { readdirSync, statSync, existsSync } from "fs";
-import * as process from "node:process";
+import "dotenv/config";
 import { DirectoryTree, ParseResult } from "../../@types/board";
 
 const excludedFiles = ["README.md"];
