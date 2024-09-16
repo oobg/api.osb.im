@@ -1,112 +1,91 @@
-import { join } from "path";
-import { readdirSync, statSync, existsSync } from "fs";
+import { existsSync } from "fs";
 import "dotenv/config";
 import { DirectoryTree, ParseResult } from "../../@types/board";
 import dir from "./directory";
 
-const excludedFiles = ["README.md"];
-const excludedPatterns = [/^\./, /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\.md$/]; // 점(.)으로 시작하는 디렉토리와 IP 패턴
+const media: string = "media";
 
-const parseDirectory = (dir: string): string[] => {
-	let results: string[] = [];
-	const list = readdirSync(dir);
+// 디렉토리 경로에서 gitDir의 위치를 찾고, 해당 경로 이후 부분을 반환
+const extractPartsFromPath = (filePath: string, gitDirectory: string): string[] | null => {
+	const cloneIndex = filePath.split("/").indexOf(gitDirectory);
+	if (cloneIndex === -1) return null;
+	return filePath.split("/").slice(cloneIndex + 1);
+};
 
-	for (const file of list) {
-		const fullPath = join(dir, file);
-		const stat = statSync(fullPath);
+// 파일 경로를 디렉토리 트리에 추가하는 함수
+const addToTree = (parts: string[], tree: DirectoryTree, isMedia: boolean): void => {
+	let currentLevel: DirectoryTree = tree;
 
-		if (stat && stat.isDirectory()) {
-			if (!excludedPatterns.some((pattern) => pattern.test(file))) {
-				results = results.concat(parseDirectory(fullPath));
+	// media 폴더일 경우 최상단 "media" 레벨을 제거
+	const startIndex = isMedia && parts[0] === media ? 1 : 0;
+
+	parts.slice(startIndex).forEach((part, index) => {
+		if (index === parts.length - startIndex - 1) {
+			// 마지막 부분이면 파일이므로 배열에 추가
+			if (!Array.isArray(currentLevel)) {
+				if (!currentLevel[part]) {
+					currentLevel[part] = [];
+				} else if (!Array.isArray(currentLevel[part])) {
+					currentLevel[part] = [];
+				}
+				(currentLevel[part] as string[]).push(part);
+			} else {
+				currentLevel.push(part);
 			}
 		} else {
-			if (
-				!excludedFiles.includes(file) &&
-				!excludedPatterns.some((pattern) => pattern.test(file))
-			) {
-				results.push(fullPath);
+			// 디렉토리라면 객체로 생성
+			if (!currentLevel[part]) {
+				currentLevel[part] = {};
+			} else if (Array.isArray(currentLevel[part])) {
+				currentLevel[part] = {};
 			}
+			currentLevel = currentLevel[part] as DirectoryTree;
+		}
+	});
+};
+
+// 객체 내에서 배열로 변환 가능한 부분을 배열로 변환하는 함수
+const convertToArrayIfNeeded = (obj: DirectoryTree): DirectoryTree | string[] => {
+	const keys = Object.keys(obj);
+	if (keys.every((key) => Array.isArray(obj[key]))) {
+		return keys.reduce((arr, key) => arr.concat(obj[key] as string[]), [] as string[]);
+	}
+
+	for (const key in obj) {
+		if (typeof obj[key] === "object" && !Array.isArray(obj[key])) {
+			obj[key] = convertToArrayIfNeeded(obj[key] as DirectoryTree);
 		}
 	}
 
-	return results;
+	return obj;
 };
 
+// buildTree 함수는 각 경로에 따라 트리를 빌드하는 역할만 담당
 const buildTree = (
 	paths: string[]
 ): { mediaTree: DirectoryTree; directoryTree: DirectoryTree } => {
 	const tree: DirectoryTree = {};
 	const mediaTree: DirectoryTree = {};
+	const gitDir = process.env.GIT_DIR as string;
 
 	paths.forEach((filePath) => {
-		const gitDir = process.env.GIT_DIR;
-		const cloneIndex = filePath.split("/").indexOf(gitDir);
-		if (cloneIndex === -1) return;
+		const parts = extractPartsFromPath(filePath, gitDir);
+		if (!parts) return;
 
-		const parts = filePath.split("/").slice(cloneIndex + 1);
-
-		let currentLevel: DirectoryTree;
-
-		// 미디어 파일은 mediaTree에 추가, 그 외는 directoryTree에 추가
-		if (parts[0] === "media") {
-			currentLevel = mediaTree;
-		} else {
-			currentLevel = tree;
-		}
-
-		parts.forEach((part, index) => {
-			if (index === parts.length - 1) {
-				// 마지막 부분이면 파일이므로 배열에 추가
-				if (!Array.isArray(currentLevel)) {
-					if (!currentLevel[part]) {
-						currentLevel[part] = [];
-					} else if (!Array.isArray(currentLevel[part])) {
-						// 이전에 객체로 되어 있었던 것을 배열로 변환
-						currentLevel[part] = [];
-					}
-					(currentLevel[part] as string[]).push(part);
-				} else {
-					currentLevel.push(part);
-				}
-			} else {
-				// 디렉토리라면 객체로 생성
-				if (!currentLevel[part]) {
-					currentLevel[part] = {};
-				} else if (Array.isArray(currentLevel[part])) {
-					// 이전에 배열로 되어 있었던 것을 객체로 변환
-					currentLevel[part] = {};
-				}
-				currentLevel = currentLevel[part] as DirectoryTree;
-			}
-		});
+		// media 폴더는 1뎁스를 제거하여 추가
+		const currentTree = parts[0] === media ? mediaTree : tree;
+		addToTree(parts, currentTree, parts[0] === media);
 	});
-
-	// 객체 내에서 배열로 변환 가능한 부분을 배열로 변환
-	const convertToArrayIfNeeded = (
-		obj: DirectoryTree
-	): DirectoryTree | string[] => {
-		const keys = Object.keys(obj);
-		if (keys.every((key) => Array.isArray(obj[key]))) {
-			return keys.reduce(
-				(arr, key) => arr.concat(obj[key] as string[]),
-				[] as string[]
-			);
-		}
-
-		for (const key in obj) {
-			if (typeof obj[key] === "object" && !Array.isArray(obj[key])) {
-				obj[key] = convertToArrayIfNeeded(obj[key] as DirectoryTree);
-			}
-		}
-
-		return obj;
-	};
 
 	return {
 		mediaTree: convertToArrayIfNeeded(mediaTree) as DirectoryTree,
 		directoryTree: convertToArrayIfNeeded(tree) as DirectoryTree,
 	};
 };
+
+const convertJson = (obj: DirectoryTree) => {
+	return JSON.parse(JSON.stringify(obj, null, 2));
+}
 
 const parser = (): ParseResult => {
 	const targetDir: string = dir.getTarget();
@@ -115,11 +94,11 @@ const parser = (): ParseResult => {
 		throw new Error(`Directory not found: ${targetDir}`);
 	}
 
-	const files = parseDirectory(targetDir);
+	const files = dir.parse(targetDir);
 	console.log("Parsed files: ", files);
 	const { mediaTree, directoryTree } = buildTree(files);
-	const media = JSON.parse(JSON.stringify(mediaTree, null, 2));
-	const directory = JSON.parse(JSON.stringify(directoryTree, null, 2));
+	const media = convertJson(mediaTree);
+	const directory = convertJson(directoryTree);
 
 	return { media, directory };
 };
