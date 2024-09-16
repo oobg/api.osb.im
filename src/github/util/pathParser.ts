@@ -3,7 +3,7 @@ import "dotenv/config";
 import { DirectoryTree, ParseResult } from "../../@types/board";
 import dir from "./directory";
 
-const media: string = "media";
+const mediaRoot: string = "media";
 
 // 디렉토리 경로에서 gitDir의 위치를 찾고, 해당 경로 이후 부분을 반환
 const extractPartsFromPath = (filePath: string, gitDirectory: string): string[] | null => {
@@ -17,7 +17,7 @@ const addToTree = (parts: string[], tree: DirectoryTree, isMedia: boolean): void
 	let currentLevel: DirectoryTree = tree;
 
 	// media 폴더일 경우 최상단 "media" 레벨을 제거
-	const startIndex = isMedia && parts[0] === media ? 1 : 0;
+	const startIndex = isMedia && parts[0] === mediaRoot ? 1 : 0;
 
 	parts.slice(startIndex).forEach((part, index) => {
 		if (index === parts.length - startIndex - 1) {
@@ -63,7 +63,7 @@ const convertToArrayIfNeeded = (obj: DirectoryTree): DirectoryTree | string[] =>
 // buildTree 함수는 각 경로에 따라 트리를 빌드하는 역할만 담당
 const buildTree = (
 	paths: string[]
-): { mediaTree: DirectoryTree; directoryTree: DirectoryTree } => {
+): { media: DirectoryTree; directory: DirectoryTree } => {
 	const tree: DirectoryTree = {};
 	const mediaTree: DirectoryTree = {};
 	const gitDir = process.env.GIT_DIR as string;
@@ -73,19 +73,15 @@ const buildTree = (
 		if (!parts) return;
 
 		// media 폴더는 1뎁스를 제거하여 추가
-		const currentTree = parts[0] === media ? mediaTree : tree;
-		addToTree(parts, currentTree, parts[0] === media);
+		const currentTree = parts[0] === mediaRoot ? mediaTree : tree;
+		addToTree(parts, currentTree, parts[0] === mediaRoot);
 	});
 
 	return {
-		mediaTree: convertToArrayIfNeeded(mediaTree) as DirectoryTree,
-		directoryTree: convertToArrayIfNeeded(tree) as DirectoryTree,
+		media: convertToArrayIfNeeded(mediaTree) as DirectoryTree,
+		directory: convertToArrayIfNeeded(tree) as DirectoryTree,
 	};
 };
-
-const convertJson = (obj: DirectoryTree) => {
-	return JSON.parse(JSON.stringify(obj, null, 2));
-}
 
 const parser = (): ParseResult => {
 	const targetDir: string = dir.getTarget();
@@ -95,10 +91,7 @@ const parser = (): ParseResult => {
 	}
 
 	const files = dir.parse(targetDir);
-	console.log("Parsed files: ", files);
-	const { mediaTree, directoryTree } = buildTree(files);
-	const media = convertJson(mediaTree);
-	const directory = convertJson(directoryTree);
+	const { media, directory } = buildTree(files);
 
 	return { media, directory };
 };
