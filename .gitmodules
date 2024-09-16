@@ -2,3 +2,7 @@
 	path = env
 	url = https://github.com/oobg/env-hub.git
 	branch = api-osb-im
+[submodule "post"]
+	path = post
+	url = https://github.com/oobg/blog-obsidian.git
+	branch = main

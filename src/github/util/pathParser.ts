@@ -2,6 +2,7 @@ import { join } from "path";
 import { readdirSync, statSync, existsSync } from "fs";
 import "dotenv/config";
 import { DirectoryTree, ParseResult } from "../../@types/board";
+import dir from "./directory";
 
 const excludedFiles = ["README.md"];
 const excludedPatterns = [/^\./, /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\.md$/]; // 점(.)으로 시작하는 디렉토리와 IP 패턴
@@ -108,8 +109,7 @@ const buildTree = (
 };
 
 const parser = (): ParseResult => {
-	const projectRoot = process.cwd();
-	const targetDir = join(projectRoot, "src", process.env.GIT_DIR);
+	const targetDir: string = dir.getTarget();
 
 	if (!existsSync(targetDir)) {
 		throw new Error(`Directory not found: ${targetDir}`);

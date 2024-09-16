@@ -2,14 +2,13 @@ import { join } from "path";
 import simpleGit, { SimpleGit } from "simple-git";
 import "dotenv/config";
 import { existsSync } from "fs";
-
-// Git 인터페이스 초기화
-const git: SimpleGit = simpleGit();
+import dir from "./directory";
 
 // Git 리포지토리 클론 함수
 const gitClone = async (): Promise<string> => {
-	const projectRoot = process.cwd();
-	const targetDir = join(projectRoot, "src", process.env.GIT_DIR || "."); // 기본 경로를 상위 프로젝트로 설정
+	const targetDir: string = dir.getTarget();
+
+	const git: SimpleGit = simpleGit();
 
 	// 디렉토리가 존재하면 클론을 건너뛴다
 	if (existsSync(targetDir)) {
@@ -34,8 +33,7 @@ const gitClone = async (): Promise<string> => {
 
 // Git 히스토리 가져오기 함수
 const gitHistory = async (limit: number = 10): Promise<any> => {
-	const projectRoot = process.cwd();
-	const targetDir = join(projectRoot, "src", process.env.GIT_DIR || "clone"); // 상위 프로젝트의 루트로 설정
+	const targetDir: string = dir.getTarget();
 
 	// .git 폴더 확인
 	if (!existsSync(join(targetDir, ".git"))) {
@@ -44,7 +42,7 @@ const gitHistory = async (limit: number = 10): Promise<any> => {
 	}
 
 	// 상위 Git 리포지토리 경로로 이동
-	const gitRepo = simpleGit(targetDir);
+	const gitRepo: SimpleGit = simpleGit(targetDir);
 
 	try {
 		// Git 로그 옵션 설정
