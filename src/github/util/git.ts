@@ -3,6 +3,7 @@ import simpleGit, { SimpleGit } from "simple-git";
 import "dotenv/config";
 import { existsSync } from "fs";
 import dir from "./directory";
+import * as process from "node:process";
 
 // Git 리포지토리 클론 함수
 const gitClone = async (): Promise<string> => {
@@ -42,7 +43,7 @@ const gitHistory = async (limit: number = 10): Promise<any> => {
 	}
 
 	// 상위 Git 리포지토리 경로로 이동
-	const gitRepo: SimpleGit = simpleGit(targetDir);
+	const git: SimpleGit = simpleGit(targetDir);
 
 	try {
 		// Git 로그 옵션 설정
@@ -57,7 +58,7 @@ const gitHistory = async (limit: number = 10): Promise<any> => {
 			},
 		};
 
-		const logResult = await gitRepo.log(logOptions);
+		const logResult = await git.log(logOptions);
 		console.log("Git log fetched successfully:", logResult);
 		return logResult;
 	} catch (error) {
@@ -65,7 +66,32 @@ const gitHistory = async (limit: number = 10): Promise<any> => {
 	}
 };
 
+// 서브모듈 업데이트 함수 (post 디렉토리만 업데이트)
+const updateSubmodule = async (): Promise<string> => {
+	const targetDir: string = process.cwd();
+
+	console.log("targetDir:", targetDir);
+
+	// Git 서브모듈 경로로 이동
+	const git: SimpleGit = simpleGit({
+		baseDir: targetDir,
+		binary: "git",
+		trimmed: true,
+	});
+
+	try {
+		// post 서브모듈만 업데이트
+		await git.submoduleUpdate();
+		console.log(`Submodule 'post' updated successfully.`);
+		return "Submodule 'post' updated successfully.";
+	} catch (error) {
+		console.error("Error updating submodule:", error);
+		throw error;
+	}
+};
+
 export {
 	gitClone,
 	gitHistory,
+	updateSubmodule,
 };

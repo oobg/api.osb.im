@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GithubRepository } from "./github.repository";
-import { gitClone, gitHistory } from "./util/git";
+import { gitClone, gitHistory, updateSubmodule } from "./util/git";
 import { parser } from "./util/pathParser";
 import { ParseResult } from "../@types/board";
 import { LogResult } from "simple-git";
@@ -37,6 +37,17 @@ export class GithubService {
 		} catch (error) {
 			console.error("Error fetching git history: ", error.message);
 			throw new Error(`Failed to fetch git history. Reason: ${error.message}`);
+		}
+	}
+
+	// 서브모듈 업데이트 함수 (post 디렉토리만)
+	async updateSubmodulePost(): Promise<string> {
+		try {
+			console.log("Updating post submodule...");
+			return await updateSubmodule();  // 서브모듈만 업데이트하는 함수 호출
+		} catch (error) {
+			console.error("Error updating post submodule: ", error.message);
+			throw new Error(`Failed to update post submodule. Reason: ${error.message}`);
 		}
 	}
 }

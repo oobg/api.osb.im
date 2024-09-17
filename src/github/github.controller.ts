@@ -34,4 +34,9 @@ export class GithubController {
 		const parsedLimit = parseInt(limit, 10) || 10;  // limit 값이 없으면 기본값 10
 		return await httpHandler(async () => await this.githubService.getRepositoryHistory(parsedLimit));
 	}
+
+	@Get("/submodule/update")
+	async updateSubmodulePost(): Promise<HttpResponse<string>> {
+		return await httpHandler(async () => await this.githubService.updateSubmodulePost());
+	}
 }
