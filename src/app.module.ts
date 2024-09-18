@@ -17,7 +17,7 @@ import { join } from "path";
       cache: true,
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, "..", process.env.GIT_DIR),  // 클론한 프로젝트의 경로
+      rootPath: join(__dirname, "..", process.env.GIT_DIR || "post"),  // 클론한 프로젝트의 경로
       serveRoot: "/file",  // 리소스에 접근할 경로 설정
     }),
     TypeOrmModule.forRootAsync({ useFactory: TypeOrmConfig }),
